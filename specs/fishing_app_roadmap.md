@@ -84,6 +84,14 @@ Goal: build the mobile frontend against the working API.
 5. Tackle Inventory screen — view owned lures, add from catalog, add custom lure
 6. Recommendations screen — shows "what to throw" based on current time/season; splits into "from your bag" and "consider buying"
 7. Stats screen — biggest fish, most-used lure, most active month
+8. Spot Conditions screen — from the Map tab, tapping a waterbody navigates to a conditions page. Pulls live weather from Open-Meteo (free, no API key) for the spot's coordinates. Indicators displayed as rounded-square cards, each with a speedometer/gauge showing fishing favorability (green = good, red = bad), not raw value. Indicators:
+   - **Air temperature** — comfort window for active fish
+   - **Water temperature** — estimated from recent air temp trend (Open-Meteo doesn't expose inland water temp directly)
+   - **Barometric pressure** — falling pressure scores highest (most fishing-active)
+   - **Wind speed** — moderate wind (5–12 mph) scores highest; calm and gale both score lower
+   - **Cloud cover** — overcast scores higher than full sun
+   - **Precipitation chance** — light recent rain scores higher than heavy or none
+   - **Moon phase** — computed client-side from date; full/new moon score highest (solunar)
 
 ### Phase 4 — Polish & Deploy
 Goal: make it portfolio-ready.
@@ -102,7 +110,15 @@ Goal: replace the stub with a real model.
 4. Expose the same API contract the stub used — no other services need to change
 5. Revisit privacy guarantees: k-anonymity minimums before a cohort influences recommendations
 
-### Phase 6 — Sponsorship & Monetization Infrastructure (future)
+### Phase 6.5 — AI-Interpreted Conditions (Pro plan, future)
+Goal: turn raw weather indicators into actionable fishing advice as a paid tier.
+
+1. Spot Conditions today shows neutral raw scales (e.g., temp 0–100°F, pressure 28.5–30.5 inHg, etc.) — no interpretation
+2. Pro tier: ship the indicator set + spot context (region, season, recent catch history at the spot) to an LLM and return tailored guidance — e.g., "pressure is dropping fast and water temp is 62°F — try slow-moving jigs near drop-offs in the next 2 hours"
+3. Cache responses per-spot per-hour to keep API costs sane
+4. Consider on-device small models later for offline use
+
+### Phase 7 — Sponsorship & Monetization Infrastructure (future)
 Goal: enable brand partnerships without changing the app architecture.
 
 1. Add a `sponsored_placements` table to the Tackle Service schema — brand, lure_id, active dates, impression budget, purchase_url with affiliate params

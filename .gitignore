@@ -1,2 +1,5 @@
 CLAUDE.md
 .claude
+**/build/
+minikube-linux-amd64
+kubectl

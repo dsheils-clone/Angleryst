@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 CREATE TABLE IF NOT EXISTS "locations"(
     "id" SERIAL,
     "name" VARCHAR(255) NOT NULL,
+    "town" VARCHAR(255),
     "latitude" FLOAT NOT NULL,
     "longitude" FLOAT NOT NULL,
     "public" BOOLEAN NOT NULL DEFAULT TRUE,
@@ -62,3 +63,17 @@ CREATE TABLE IF NOT EXISTS "catches"(
   FOREIGN KEY (location) REFERENCES locations(id),
   FOREIGN KEY (lure_id) REFERENCES lures(id)
 );
+
+INSERT INTO species (name) VALUES
+  ('Largemouth Bass'), ('Smallmouth Bass'), ('Northern Pike'),
+  ('Walleye'), ('Rainbow Trout'), ('Brown Trout'),
+  ('Bluegill'), ('Crappie')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO locations (name, town, latitude, longitude) VALUES
+  ('Farm Pond', 'Sherborn', 42.2435, -71.3651),
+  ('Lake Cochituate', 'Framingham', 42.3209, -71.3993),
+  ('Lake Winthrop', 'Holliston', 42.1958, -71.4486),
+  ('Ashland Reservoir', 'Ashland', 42.2502, -71.4733),
+  ('Hopkinton Reservoir', 'Hopkinton', 42.2266, -71.5417)
+ON CONFLICT DO NOTHING;

@@ -1,9 +1,15 @@
 version: '3.8'
-services:
- db:
-    image: postgres
-    restart: always
 
+x-service-env: &service-env
+  DB_URL: jdbc:postgresql://db:5432/anglerystDB
+  DB_USERNAME: ds
+  DB_PASSWORD: REDACTED
+  JWT_SECRET: REDACTED
+
+services:
+  db:
+    image: postgres:17
+    restart: always
     environment:
       POSTGRES_PASSWORD: REDACTED
       POSTGRES_USER: ds
@@ -11,7 +17,88 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql
+      - postgres-data:/var/lib/postgresql/data
       - ../db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ds -d anglerystDB"]
+      interval: 5s
+      retries: 10
+
+  user-service:
+    image: angleryst/user-service:latest
+    build:
+      context: ../user-service
+    environment:
+      <<: *service-env
+    ports:
+      - "8090:8090"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  catch-service:
+    image: angleryst/catch-service:latest
+    build:
+      context: ../catch-service
+    environment:
+      <<: *service-env
+    ports:
+      - "8091:8091"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tackle-service:
+    image: angleryst/tackle-service:latest
+    build:
+      context: ../tackle-service
+    environment:
+      <<: *service-env
+    ports:
+      - "8092:8092"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  inventory-service:
+    image: angleryst/inventory-service:latest
+    build:
+      context: ../inventory-service
+    environment:
+      <<: *service-env
+    ports:
+      - "8093:8093"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  recommendation-service:
+    image: angleryst/recommendation-service:latest
+    build:
+      context: ../recommendation-service
+    environment:
+      JWT_SECRET: REDACTED
+    ports:
+      - "8094:8094"
+
+  api-gateway:
+    image: angleryst/api-gateway:latest
+    build:
+      context: ../api-gateway
+    environment:
+      USER_SERVICE_URL: http://user-service:8090
+      CATCH_SERVICE_URL: http://catch-service:8091
+      TACKLE_SERVICE_URL: http://tackle-service:8092
+      INVENTORY_SERVICE_URL: http://inventory-service:8093
+      RECOMMENDATION_SERVICE_URL: http://recommendation-service:8094
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - catch-service
+      - tackle-service
+      - inventory-service
+      - recommendation-service
+
 volumes:
   postgres-data:
