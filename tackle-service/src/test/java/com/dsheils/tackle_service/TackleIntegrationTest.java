@@ -25,7 +25,6 @@ class TackleIntegrationTest {
     @Autowired ObjectMapper objectMapper;
     @Autowired JwtUtil jwtUtil;
     @Autowired LureRepository lureRepository;
-    @Autowired InventoryRepository inventoryRepository;
 
     private String tokenUser1;
     private String tokenUser2;
@@ -68,61 +67,18 @@ class TackleIntegrationTest {
     }
 
     @Test
-    void addToInventory_success() throws Exception {
-        Lure lure = saveCatalogLure("Rapala", "crankbait");
-
-        mockMvc.perform(post("/tackle/inventory/" + lure.getId())
-                .header("Authorization", "Bearer " + tokenUser1))
-            .andExpect(status().isOk());
-
-        assertThat(inventoryRepository.existsByUserIdAndLureId(1, lure.getId())).isTrue();
-    }
-
-    @Test
-    void addToInventory_customLure_fails() throws Exception {
-        Lure custom = saveCustomLure(1, "My Jig", "jig");
-
-        mockMvc.perform(post("/tackle/inventory/" + custom.getId())
-                .header("Authorization", "Bearer " + tokenUser1))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void addToInventory_duplicate_fails() throws Exception {
-        Lure lure = saveCatalogLure("Rapala", "crankbait");
-        addToInventoryDirect(1, lure.getId());
-
-        mockMvc.perform(post("/tackle/inventory/" + lure.getId())
-                .header("Authorization", "Bearer " + tokenUser1))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void removeFromInventory_success() throws Exception {
-        Lure lure = saveCatalogLure("Rapala", "crankbait");
-        addToInventoryDirect(1, lure.getId());
-
-        mockMvc.perform(delete("/tackle/inventory/" + lure.getId())
-                .header("Authorization", "Bearer " + tokenUser1))
-            .andExpect(status().isNoContent());
-
-        assertThat(inventoryRepository.existsByUserIdAndLureId(1, lure.getId())).isFalse();
-    }
-
-    @Test
-    void getInventory_includesOwnedAndCustom() throws Exception {
-        Lure catalog = saveCatalogLure("Rapala", "crankbait");
-        addToInventoryDirect(1, catalog.getId());
+    void getCustomLures_returnsOnlyCallersLures() throws Exception {
         saveCustomLure(1, "My Jig", "jig");
+        saveCustomLure(1, "My Spoon", "spoon");
         saveCustomLure(2, "Other Jig", "jig");
 
-        String body = mockMvc.perform(get("/tackle/inventory")
+        String body = mockMvc.perform(get("/tackle/custom")
                 .header("Authorization", "Bearer " + tokenUser1))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
 
-        Lure[] inventory = objectMapper.readValue(body, Lure[].class);
-        assertThat(inventory).hasSize(2);
+        Lure[] custom = objectMapper.readValue(body, Lure[].class);
+        assertThat(custom).hasSize(2).allMatch(l -> l.getUserId() == 1);
     }
 
     @Test
@@ -137,7 +93,8 @@ class TackleIntegrationTest {
                 .content(json))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("My Spoon"))
-            .andExpect(jsonPath("$.custom").value(true));
+            .andExpect(jsonPath("$.custom").value(true))
+            .andExpect(jsonPath("$.userId").value(1));
     }
 
     @Test
@@ -181,12 +138,5 @@ class TackleIntegrationTest {
         l.setCustom(true);
         l.setUserId(userId);
         return lureRepository.save(l);
-    }
-
-    private void addToInventoryDirect(int userId, int lureId) {
-        InventoryItem item = new InventoryItem();
-        item.setUserId(userId);
-        item.setLureId(lureId);
-        inventoryRepository.save(item);
     }
 }

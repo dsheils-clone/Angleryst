@@ -36,10 +36,11 @@ CREATE TABLE IF NOT EXISTS "lures"(
     PRIMARY KEY ("id"),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
-CREATE TABLE IF NOT EXISTS "lure_inventory" (
+CREATE TABLE IF NOT EXISTS "user_inventory" (
     "id" SERIAL,
     "user_id" INT NOT NULL,
     "lure_id" INT NOT NULL,
+    "quantity" INT NOT NULL DEFAULT 1,
     PRIMARY KEY ("id"),
     UNIQUE ("user_id", "lure_id"),
     FOREIGN KEY ("user_id") REFERENCES users(id),

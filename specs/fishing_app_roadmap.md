@@ -25,8 +25,9 @@ Five Spring Boot microservices, each in its own Kubernetes pod:
 1. **API Gateway** — single entry point, routes all traffic to downstream services via Spring Cloud Gateway.
 2. **User Service** — registration, login, JWT issuance and validation.
 3. **Catch Service** — core domain. CRUD for catches; each catch records species, weight, length, date, time of day, weather notes, photo path, GPS spot reference, and lure used (foreign key to lure catalog or custom lure).
-4. **Tackle Service** — manages the lure catalog (seeded, community entries) and each user's personal tackle inventory (which catalog lures they own, plus any custom lures they've added).
-5. **Recommendation Service** — stubbed for now. Accepts a request (time of day, season, region) and returns lure suggestions: some from the user's inventory, some as suggested purchases. In the stub, responses are hardcoded or rule-based. The real ML model slots in here later without touching other services.
+4. **Tackle Service** — manages the lure catalog (seeded, community entries) and custom lures a user has created (flagged `is_custom = true`, scoped to their account).
+5. **Inventory Service** — manages each user's personal tackle inventory: which catalog lures they own and in what quantity (`user_inventory` table with `user_id`, `lure_id`, `quantity`). Inventory entries reference lure IDs from the catalog; the service does not duplicate lure metadata.
+6. **Recommendation Service** — stubbed for now. Accepts a request (time of day, season, region) and returns lure suggestions: some from the user's inventory, some as suggested purchases. In the stub, responses are hardcoded or rule-based. The real ML model slots in here later without touching other services.
 
 Each service owns its own PostgreSQL schema. A single Postgres StatefulSet in k8s is fine to start.
 
@@ -34,7 +35,9 @@ Each service owns its own PostgreSQL schema. A single Postgres StatefulSet in k8
 
 ## Data Notes
 
-**Lure Catalog** — a seeded table of known lures (name, type, brand, size, color family, purchase_url, sku). Include `purchase_url` and `sku` from the start — null for now, but these are the fields affiliate links and sponsored SKUs will populate later. Users pick from this when logging a catch or adding to their inventory. If a lure isn't in the catalog, they can add a custom entry (flagged `is_custom = true`, scoped to their account; custom lures are never eligible for sponsorship).
+**Lure Catalog** — a seeded table of known lures (name, type, brand, size, color family, purchase_url, sku). Include `purchase_url` and `sku` from the start — null for now, but these are the fields affiliate links and sponsored SKUs will populate later. Users pick from this when logging a catch or adding to their inventory. If a lure isn't in the catalog, they can add a custom entry via the Tackle Service (flagged `is_custom = true`, scoped to their account; custom lures are never eligible for sponsorship).
+
+**User Inventory** — tracked in the `user_inventory` table: `user_id` (FK → users), `lure_id` (FK → lures), `quantity`. A unique constraint on `(user_id, lure_id)` enforces one row per lure per user; quantity represents how many of that lure the user owns. Managed entirely by the Inventory Service.
 
 **Catch table additions vs. original design:**
 - `lure_id` — FK to catalog lure or custom lure
@@ -55,10 +58,11 @@ Goal: get all services running and talking to each other before adding orchestra
 1. Set up PostgreSQL via Docker Compose
 2. Scaffold User Service — registration, login, JWT
 3. Scaffold Catch Service — full CRUD, JWT-protected; include `lure_id` and `time_of_day` from the start
-4. Scaffold Tackle Service — seed the lure catalog; user inventory CRUD; custom lure creation
-5. Scaffold Recommendation Service stub — hardcoded responses that match the real response contract
-6. Scaffold API Gateway — route `/users/**`, `/catches/**`, `/tackle/**`, `/recommendations/**`
-7. Test all endpoints with Postman or Bruno
+4. Scaffold Tackle Service — lure catalog endpoints; custom lure creation/deletion
+5. Scaffold Inventory Service — user inventory CRUD with quantity tracking (`user_inventory` table)
+6. Scaffold Recommendation Service stub — hardcoded responses that match the real response contract
+7. Scaffold API Gateway — route `/users/**`, `/catches/**`, `/tackle/**`, `/inventory/**`, `/recommendations/**`
+8. Test all endpoints with Postman or Bruno
 
 ### Phase 2 — Kubernetes Locally (kind or minikube)
 Goal: deploy all five services into a local cluster.
