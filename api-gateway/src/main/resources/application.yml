@@ -7,8 +7,8 @@ server:
 
 gateway:
   routes:
-    users: http://localhost:8090
-    catches: http://localhost:8091
-    tackle: http://localhost:8092
-    inventory: http://localhost:8093
-    recommendations: http://localhost:8094
+    users: ${USER_SERVICE_URL:http://localhost:8090}
+    catches: ${CATCH_SERVICE_URL:http://localhost:8091}
+    tackle: ${TACKLE_SERVICE_URL:http://localhost:8092}
+    inventory: ${INVENTORY_SERVICE_URL:http://localhost:8093}
+    recommendations: ${RECOMMENDATION_SERVICE_URL:http://localhost:8094}

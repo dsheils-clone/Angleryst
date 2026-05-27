@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: angleryst-config
+data:
+  DB_URL: "jdbc:postgresql://postgres:5432/anglerystDB"
+  DB_USERNAME: "ds"
+  USER_SERVICE_URL: "http://user-service:8090"
+  CATCH_SERVICE_URL: "http://catch-service:8091"
+  TACKLE_SERVICE_URL: "http://tackle-service:8092"
+  INVENTORY_SERVICE_URL: "http://inventory-service:8093"
+  RECOMMENDATION_SERVICE_URL: "http://recommendation-service:8094"
