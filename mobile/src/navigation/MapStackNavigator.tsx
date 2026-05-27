@@ -11,7 +11,7 @@ export default function MapStackNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Spots" component={SpotsScreen} options={{ title: 'My Spots' }} />
-      <Stack.Screen name="SpotDetail" component={SpotDetailScreen} options={{ title: 'Spot Detail' }} />
+      <Stack.Screen name="SpotDetail" component={SpotDetailScreen} options={{ title: 'Details' }} />
       <Stack.Screen name="SpotRecs" component={SpotRecsScreen} options={{ title: 'What to Throw' }} />
       <Stack.Screen name="SpotConditions" component={SpotConditionsScreen} options={{ title: 'Conditions' }} />
     </Stack.Navigator>

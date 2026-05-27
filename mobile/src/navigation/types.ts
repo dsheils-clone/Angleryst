@@ -10,7 +10,7 @@ export type AuthStackParamList = {
 
 export type CatchStackParamList = {
   CatchHistory: undefined;
-  LogCatch: undefined;
+  LogCatch: { editCatchId?: number; speciesId?: number; weight?: number; length?: number; locationId?: number; lureId?: number; dateCaught?: string } | undefined;
   SpotPicker: { onSelect: (locationId: number, name: string) => void };
   LurePicker: { onSelect: (lureId: number, name: string) => void };
 };

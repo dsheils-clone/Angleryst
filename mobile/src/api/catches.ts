@@ -29,3 +29,12 @@ export async function logCatch(payload: LogCatchRequest): Promise<Catch> {
   const res = await client.post('/catches', payload);
   return res.data;
 }
+
+export async function updateCatch(id: number, payload: LogCatchRequest): Promise<Catch> {
+  const res = await client.put(`/catches/${id}`, payload);
+  return res.data;
+}
+
+export async function deleteCatch(id: number): Promise<void> {
+  await client.delete(`/catches/${id}`);
+}

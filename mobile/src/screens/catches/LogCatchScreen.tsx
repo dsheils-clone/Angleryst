@@ -1,22 +1,46 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CatchStackParamList } from '../../navigation/types';
-import { logCatch } from '../../api/catches';
+import { logCatch, updateCatch } from '../../api/catches';
+import { getSpots } from '../../api/spots';
+import { getCatalog, getCustomLures } from '../../api/tackle';
 import { notify } from '../../util/alert';
 import { SPECIES } from '../../util/species';
 
 type Props = NativeStackScreenProps<CatchStackParamList, 'LogCatch'>;
 
-export default function LogCatchScreen({ navigation }: Props) {
-  const [speciesId, setSpeciesId] = useState(1);
-  const [weight, setWeight] = useState('');
-  const [length, setLength] = useState('');
-  const [selectedSpot, setSelectedSpot] = useState<{ id: number; name: string } | null>(null);
-  const [selectedLure, setSelectedLure] = useState<{ id: number; name: string } | null>(null);
-  const [loading, setLoading] = useState(false);
+export default function LogCatchScreen({ navigation, route }: Props) {
+  const editing = route.params?.editCatchId;
 
-  const [dateCaught, setDateCaught] = useState(new Date().toISOString().split('T')[0]);
+  const [speciesId, setSpeciesId] = useState(route.params?.speciesId ?? 1);
+  const [weight, setWeight] = useState(route.params?.weight != null ? String(route.params.weight) : '');
+  const [length, setLength] = useState(route.params?.length != null ? String(route.params.length) : '');
+  const [selectedSpot, setSelectedSpot] = useState<{ id: number; name: string } | null>(
+    route.params?.locationId ? { id: route.params.locationId, name: '…' } : null
+  );
+  const [selectedLure, setSelectedLure] = useState<{ id: number; name: string } | null>(
+    route.params?.lureId ? { id: route.params.lureId, name: '…' } : null
+  );
+  const [loading, setLoading] = useState(false);
+  const [dateCaught, setDateCaught] = useState(route.params?.dateCaught ?? new Date().toISOString().split('T')[0]);
+
+  useEffect(() => {
+    navigation.setOptions({ title: editing ? 'Edit Catch' : 'Log Catch' });
+    if (!editing) return;
+    if (route.params?.locationId) {
+      getSpots().then((spots) => {
+        const s = spots.find((x) => x.id === route.params!.locationId);
+        if (s) setSelectedSpot({ id: s.id, name: s.name });
+      }).catch(() => {});
+    }
+    if (route.params?.lureId) {
+      Promise.all([getCatalog(), getCustomLures()]).then(([catalog, customs]) => {
+        const l = [...catalog, ...customs].find((x) => x.id === route.params!.lureId);
+        if (l) setSelectedLure({ id: l.id, name: l.name });
+      }).catch(() => {});
+    }
+  }, [editing]);
 
   async function handleSave() {
     if (!weight || !length || !selectedSpot || !selectedLure) {
@@ -25,18 +49,20 @@ export default function LogCatchScreen({ navigation }: Props) {
     }
     setLoading(true);
     try {
-      await logCatch({
+      const payload = {
         speciesId,
         weight: parseFloat(weight),
         length: parseFloat(length),
         locationId: selectedSpot.id,
         lureId: selectedLure.id,
         dateCaught,
-      });
+      };
+      if (editing) await updateCatch(editing, payload);
+      else await logCatch(payload);
       navigation.goBack();
     } catch (e: any) {
       const detail = e?.response?.data ? JSON.stringify(e.response.data) : e?.message ?? 'Unknown error';
-      notify('Failed to save catch', detail);
+      notify(editing ? 'Failed to update catch' : 'Failed to save catch', detail);
     } finally {
       setLoading(false);
     }
@@ -91,7 +117,7 @@ export default function LogCatchScreen({ navigation }: Props) {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Saving…' : 'Save Catch'}</Text>
+        <Text style={styles.buttonText}>{loading ? 'Saving…' : editing ? 'Update Catch' : 'Save Catch'}</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -102,7 +128,6 @@ const styles = StyleSheet.create({
   content: { padding: 20 },
   label: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6, marginTop: 14 },
   input: { borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, padding: 12, fontSize: 16 },
-  readOnly: { backgroundColor: '#f3f4f6', color: '#6b7280' },
   picker: { borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, padding: 14 },
   pickerPlaceholder: { color: '#9ca3af', fontSize: 16 },
   pickerSelected: { color: '#111827', fontSize: 16 },

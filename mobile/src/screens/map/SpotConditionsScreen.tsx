@@ -55,7 +55,7 @@ export default function SpotConditionsScreen({ route, navigation }: Props) {
         style={styles.detailBtn}
         onPress={() => navigation.navigate('SpotDetail', { locationId: route.params.locationId, name })}
       >
-        <Text style={styles.detailBtnText}>See catches at this spot →</Text>
+        <Text style={styles.detailBtnText}>See your catches at this spot →</Text>
       </TouchableOpacity>
     </ScrollView>
   );

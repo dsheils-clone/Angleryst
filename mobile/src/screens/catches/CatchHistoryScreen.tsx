@@ -3,8 +3,9 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator }
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { CatchStackParamList } from '../../navigation/types';
-import { getCatches, Catch } from '../../api/catches';
+import { getCatches, deleteCatch, Catch } from '../../api/catches';
 import { speciesName } from '../../util/species';
+import { confirm } from '../../util/alert';
 
 type Props = NativeStackScreenProps<CatchStackParamList, 'CatchHistory'>;
 
@@ -16,6 +17,29 @@ export default function CatchHistoryScreen({ navigation }: Props) {
     setLoading(true);
     getCatches().then(setCatches).finally(() => setLoading(false));
   }, []));
+
+  function handleEdit(c: Catch) {
+    navigation.navigate('LogCatch', {
+      editCatchId: c.id,
+      speciesId: c.speciesId,
+      weight: c.weight,
+      length: c.length,
+      locationId: c.locationId,
+      lureId: c.lureId,
+      dateCaught: c.dateCaught,
+    });
+  }
+
+  function handleDelete(c: Catch) {
+    confirm('Delete catch?', 'This permanently removes it from your log.', async () => {
+      setCatches((prev) => prev.filter((x) => x.id !== c.id));
+      try {
+        await deleteCatch(c.id);
+      } catch {
+        getCatches().then(setCatches);
+      }
+    });
+  }
 
   if (loading) return <ActivityIndicator style={{ flex: 1 }} size="large" />;
 
@@ -29,8 +53,18 @@ export default function CatchHistoryScreen({ navigation }: Props) {
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>{speciesName(item.speciesId)}</Text>
-              <Text style={styles.cardDetail}>{item.weight} lbs · {item.length} in · {item.dateCaught}</Text>
+              <View style={styles.cardInfo}>
+                <Text style={styles.cardTitle}>{speciesName(item.speciesId)}</Text>
+                <Text style={styles.cardDetail}>{item.weight} lbs · {item.length} in · {item.dateCaught}</Text>
+              </View>
+              <View style={styles.actions}>
+                <TouchableOpacity style={styles.iconBtn} onPress={() => handleEdit(item)}>
+                  <Text style={styles.editIcon}>✏</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconBtn} onPress={() => handleDelete(item)}>
+                  <Text style={styles.deleteIcon}>✕</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         />
@@ -45,9 +79,14 @@ export default function CatchHistoryScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f9fafb' },
   empty: { textAlign: 'center', marginTop: 80, color: '#6b7280', fontSize: 16 },
-  card: { backgroundColor: '#fff', margin: 12, marginBottom: 0, borderRadius: 10, padding: 16, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
+  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', margin: 12, marginBottom: 0, borderRadius: 10, padding: 16, elevation: 2 },
+  cardInfo: { flex: 1 },
   cardTitle: { fontSize: 16, fontWeight: '600' },
   cardDetail: { marginTop: 4, color: '#6b7280' },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  iconBtn: { padding: 8 },
+  editIcon: { fontSize: 18, color: '#2563eb' },
+  deleteIcon: { fontSize: 18, color: '#ef4444' },
   fab: { position: 'absolute', bottom: 28, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: '#2563eb', justifyContent: 'center', alignItems: 'center', elevation: 4 },
   fabText: { color: '#fff', fontSize: 28, lineHeight: 32 },
 });
