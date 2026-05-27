@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: api-gateway
+
+server:
+  port: 8080
+
+gateway:
+  routes:
+    users: http://localhost:8090
+    catches: http://localhost:8091
+    tackle: http://localhost:8092
+    inventory: http://localhost:8093
+    recommendations: http://localhost:8094
