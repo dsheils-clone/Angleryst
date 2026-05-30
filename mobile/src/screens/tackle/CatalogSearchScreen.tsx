@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { TackleStackParamList } from '../../navigation/types';
 import { getCatalog, Lure } from '../../api/tackle';
 import { addToInventory } from '../../api/inventory';
+import { useTheme, Colors } from '../../theme';
 
 type Props = NativeStackScreenProps<TackleStackParamList, 'CatalogSearch'>;
 
@@ -12,6 +13,8 @@ export default function CatalogSearchScreen({ navigation }: Props) {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState<number | null>(null);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   useEffect(() => {
     getCatalog().then(setLures).finally(() => setLoading(false));
@@ -43,6 +46,7 @@ export default function CatalogSearchScreen({ navigation }: Props) {
       <TextInput
         style={styles.search}
         placeholder="Search by name or brand…"
+        placeholderTextColor={colors.muted}
         value={query}
         onChangeText={setQuery}
         autoFocus
@@ -54,7 +58,7 @@ export default function CatalogSearchScreen({ navigation }: Props) {
           <View style={styles.row}>
             <View style={styles.info}>
               <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.detail}>{item.brand} · {item.type}</Text>
+              <Text style={styles.detail}>{[item.brand, item.type, item.colorFamily, item.size].filter(Boolean).join(' · ')}</Text>
             </View>
             <TouchableOpacity
               style={[styles.addBtn, adding === item.id && styles.addBtnDisabled]}
@@ -71,15 +75,17 @@ export default function CatalogSearchScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  search: { margin: 12, borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, padding: 10, fontSize: 16 },
-  row: { flexDirection: 'row', alignItems: 'center', padding: 14, justifyContent: 'space-between' },
-  info: { flex: 1 },
-  name: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  detail: { fontSize: 13, color: '#6b7280', marginTop: 2 },
-  addBtn: { backgroundColor: '#2563eb', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6 },
-  addBtnDisabled: { backgroundColor: '#93c5fd' },
-  addBtnText: { color: '#fff', fontWeight: '600' },
-  separator: { height: 1, backgroundColor: '#f3f4f6' },
-});
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.bg },
+    search: { margin: 12, borderWidth: 1, borderColor: c.border, borderRadius: 8, padding: 10, fontSize: 16, color: c.text, backgroundColor: c.card },
+    row: { flexDirection: 'row', alignItems: 'center', padding: 14, justifyContent: 'space-between' },
+    info: { flex: 1 },
+    name: { fontSize: 15, fontWeight: '600', color: c.text },
+    detail: { fontSize: 13, color: c.subtext, marginTop: 2 },
+    addBtn: { backgroundColor: '#2563eb', borderRadius: 6, paddingHorizontal: 12, paddingVertical: 6 },
+    addBtnDisabled: { backgroundColor: '#93c5fd' },
+    addBtnText: { color: '#fff', fontWeight: '600' },
+    separator: { height: 1, backgroundColor: c.separator },
+  });
+}

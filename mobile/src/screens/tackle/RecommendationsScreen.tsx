@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, SectionList } from 'react-native';
 import { getRecommendations, Recommendation, currentTimeOfDay, currentSeason } from '../../api/recommendations';
+import { useTheme, Colors } from '../../theme';
 
 type Section = { title: string; data: Recommendation[] };
 
 export default function RecommendationsScreen() {
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   useEffect(() => {
     getRecommendations({
@@ -46,11 +49,13 @@ export default function RecommendationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
-  sectionHeader: { fontSize: 14, fontWeight: '700', color: '#6b7280', backgroundColor: '#f9fafb', padding: 16, paddingBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
-  card: { backgroundColor: '#fff', marginHorizontal: 12, marginBottom: 8, borderRadius: 10, padding: 14, elevation: 1 },
-  name: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  detail: { fontSize: 13, color: '#6b7280', marginTop: 2 },
-  sponsored: { fontSize: 11, color: '#9ca3af', marginTop: 4, fontStyle: 'italic' },
-});
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.bg },
+    sectionHeader: { fontSize: 14, fontWeight: '700', color: c.subtext, backgroundColor: c.bg, padding: 16, paddingBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+    card: { backgroundColor: c.card, marginHorizontal: 12, marginBottom: 8, borderRadius: 10, padding: 14, elevation: 1 },
+    name: { fontSize: 15, fontWeight: '600', color: c.text },
+    detail: { fontSize: 13, color: c.subtext, marginTop: 2 },
+    sponsored: { fontSize: 11, color: c.muted, marginTop: 4, fontStyle: 'italic' },
+  });
+}

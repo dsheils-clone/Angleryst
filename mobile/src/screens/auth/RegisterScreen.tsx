@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation/types';
 import { register } from '../../api/auth';
+import { useTheme, Colors } from '../../theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
@@ -11,6 +12,8 @@ export default function RegisterScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   async function handleRegister() {
     if (!username || !email || !password) {
@@ -33,9 +36,9 @@ export default function RegisterScreen({ navigation }: Props) {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Text style={styles.title}>Create Account</Text>
-      <TextInput style={styles.input} placeholder="Username" autoCapitalize="none" value={username} onChangeText={setUsername} />
-      <TextInput style={styles.input} placeholder="Email" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
+      <TextInput style={styles.input} placeholder="Username" placeholderTextColor={colors.muted} autoCapitalize="none" value={username} onChangeText={setUsername} />
+      <TextInput style={styles.input} placeholder="Email" placeholderTextColor={colors.muted} autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
+      <TextInput style={styles.input} placeholder="Password" placeholderTextColor={colors.muted} secureTextEntry value={password} onChangeText={setPassword} />
       <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? 'Creating account…' : 'Register'}</Text>
       </TouchableOpacity>
@@ -46,11 +49,13 @@ export default function RegisterScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#fff' },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 32, textAlign: 'center' },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 16 },
-  button: { backgroundColor: '#2563eb', borderRadius: 8, padding: 14, alignItems: 'center', marginBottom: 16 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  link: { textAlign: 'center', color: '#2563eb' },
-});
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: c.bg },
+    title: { fontSize: 28, fontWeight: 'bold', marginBottom: 32, textAlign: 'center', color: c.text },
+    input: { borderWidth: 1, borderColor: c.border, borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 16, color: c.text, backgroundColor: c.card },
+    button: { backgroundColor: '#2563eb', borderRadius: 8, padding: 14, alignItems: 'center', marginBottom: 16 },
+    buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+    link: { textAlign: 'center', color: '#2563eb' },
+  });
+}

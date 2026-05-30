@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CatchStackParamList } from '../../navigation/types';
 import { getCatalog, getCustomLures, Lure } from '../../api/tackle';
 import { getInventory } from '../../api/inventory';
+import { useTheme, Colors } from '../../theme';
 
 type Props = NativeStackScreenProps<CatchStackParamList, 'LurePicker'>;
 
@@ -14,6 +15,8 @@ export default function LurePickerScreen({ navigation, route }: Props) {
   const [owned, setOwned] = useState<OwnedLure[]>([]);
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   useEffect(() => {
     Promise.all([getInventory(), getCatalog(), getCustomLures()])
@@ -47,6 +50,7 @@ export default function LurePickerScreen({ navigation, route }: Props) {
       <TextInput
         style={styles.search}
         placeholder="Search your lures…"
+        placeholderTextColor={colors.muted}
         value={query}
         onChangeText={setQuery}
         autoFocus
@@ -73,14 +77,16 @@ export default function LurePickerScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  search: { margin: 12, borderWidth: 1, borderColor: '#d1d5db', borderRadius: 8, padding: 10, fontSize: 16 },
-  empty: { textAlign: 'center', marginTop: 60, color: '#6b7280', fontSize: 15, paddingHorizontal: 24 },
-  row: { flexDirection: 'row', alignItems: 'center', padding: 16, justifyContent: 'space-between' },
-  info: { flex: 1 },
-  name: { fontSize: 16, color: '#111827', fontWeight: '500' },
-  detail: { fontSize: 13, color: '#6b7280', marginTop: 2 },
-  chevron: { fontSize: 20, color: '#9ca3af' },
-  separator: { height: 1, backgroundColor: '#f3f4f6' },
-});
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.bg },
+    search: { margin: 12, borderWidth: 1, borderColor: c.border, borderRadius: 8, padding: 10, fontSize: 16, color: c.text, backgroundColor: c.card },
+    empty: { textAlign: 'center', marginTop: 60, color: c.subtext, fontSize: 15, paddingHorizontal: 24 },
+    row: { flexDirection: 'row', alignItems: 'center', padding: 16, justifyContent: 'space-between' },
+    info: { flex: 1 },
+    name: { fontSize: 16, color: c.text, fontWeight: '500' },
+    detail: { fontSize: 13, color: c.subtext, marginTop: 2 },
+    chevron: { fontSize: 20, color: c.muted },
+    separator: { height: 1, backgroundColor: c.separator },
+  });
+}

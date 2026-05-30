@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CatchStackParamList } from '../../navigation/types';
 import { getSpots, Spot } from '../../api/spots';
+import { useTheme, Colors } from '../../theme';
 
 type Props = NativeStackScreenProps<CatchStackParamList, 'SpotPicker'>;
 
@@ -10,6 +11,8 @@ export default function SpotPickerScreen({ navigation, route }: Props) {
   const { onSelect } = route.params;
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState(true);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   useEffect(() => {
     getSpots().then(setSpots).finally(() => setLoading(false));
@@ -42,11 +45,13 @@ export default function SpotPickerScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  row: { flexDirection: 'row', alignItems: 'center', padding: 16, justifyContent: 'space-between' },
-  name: { fontSize: 16, color: '#111827' },
-  town: { fontSize: 12, color: '#6b7280', marginTop: 2 },
-  chevron: { fontSize: 20, color: '#9ca3af' },
-  separator: { height: 1, backgroundColor: '#f3f4f6' },
-});
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.bg },
+    row: { flexDirection: 'row', alignItems: 'center', padding: 16, justifyContent: 'space-between' },
+    name: { fontSize: 16, color: c.text },
+    town: { fontSize: 12, color: c.subtext, marginTop: 2 },
+    chevron: { fontSize: 20, color: c.muted },
+    separator: { height: 1, backgroundColor: c.separator },
+  });
+}

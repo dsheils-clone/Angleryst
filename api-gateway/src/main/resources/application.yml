@@ -10,6 +10,7 @@ gateway:
     users: ${USER_SERVICE_URL:http://localhost:8090}
     catches: ${CATCH_SERVICE_URL:http://localhost:8091}
     locations: ${CATCH_SERVICE_URL:http://localhost:8091}
+    species: ${CATCH_SERVICE_URL:http://localhost:8091}
     tackle: ${TACKLE_SERVICE_URL:http://localhost:8092}
     inventory: ${INVENTORY_SERVICE_URL:http://localhost:8093}
     recommendations: ${RECOMMENDATION_SERVICE_URL:http://localhost:8094}

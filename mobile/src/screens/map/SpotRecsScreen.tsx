@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MapStackParamList } from '../../navigation/types';
 import { getRecommendations, Recommendation, currentTimeOfDay, currentSeason } from '../../api/recommendations';
+import { useTheme, Colors } from '../../theme';
 
 type Props = NativeStackScreenProps<MapStackParamList, 'SpotRecs'>;
 
@@ -10,6 +11,8 @@ export default function SpotRecsScreen({ route }: Props) {
   const { region } = route.params;
   const [recs, setRecs] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   useEffect(() => {
     getRecommendations({
@@ -26,13 +29,13 @@ export default function SpotRecsScreen({ route }: Props) {
 
   return (
     <View style={styles.container}>
-      <Section title="From your bag" items={fromBag} />
-      <Section title="Consider picking up" items={toBuy} />
+      <Section title="From your bag" items={fromBag} styles={styles} />
+      <Section title="Consider picking up" items={toBuy} styles={styles} />
     </View>
   );
 }
 
-function Section({ title, items }: { title: string; items: Recommendation[] }) {
+function Section({ title, items, styles }: { title: string; items: Recommendation[]; styles: ReturnType<typeof makeStyles> }) {
   if (items.length === 0) return null;
   return (
     <View style={styles.section}>
@@ -50,12 +53,14 @@ function Section({ title, items }: { title: string; items: Recommendation[] }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
-  section: { padding: 16 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#374151', marginBottom: 10 },
-  card: { backgroundColor: '#fff', borderRadius: 8, padding: 14, marginBottom: 8, elevation: 1 },
-  lureName: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  lureDetail: { fontSize: 13, color: '#6b7280', marginTop: 2 },
-  sponsored: { fontSize: 11, color: '#9ca3af', marginTop: 4, fontStyle: 'italic' },
-});
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.bg },
+    section: { padding: 16 },
+    sectionTitle: { fontSize: 16, fontWeight: '700', color: c.emphasis, marginBottom: 10 },
+    card: { backgroundColor: c.card, borderRadius: 8, padding: 14, marginBottom: 8, elevation: 1 },
+    lureName: { fontSize: 15, fontWeight: '600', color: c.text },
+    lureDetail: { fontSize: 13, color: c.subtext, marginTop: 2 },
+    sponsored: { fontSize: 11, color: c.muted, marginTop: 4, fontStyle: 'italic' },
+  });
+}

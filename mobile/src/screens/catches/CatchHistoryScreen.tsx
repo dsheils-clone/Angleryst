@@ -1,21 +1,30 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { CatchStackParamList } from '../../navigation/types';
 import { getCatches, deleteCatch, Catch } from '../../api/catches';
-import { speciesName } from '../../util/species';
+import { getSpecies, SpeciesEntry } from '../../api/species';
+import { speciesName, registerSpecies } from '../../util/species';
 import { confirm } from '../../util/alert';
+import { useTheme, Colors } from '../../theme';
 
 type Props = NativeStackScreenProps<CatchStackParamList, 'CatchHistory'>;
 
 export default function CatchHistoryScreen({ navigation }: Props) {
   const [catches, setCatches] = useState<Catch[]>([]);
   const [loading, setLoading] = useState(true);
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   useFocusEffect(useCallback(() => {
     setLoading(true);
-    getCatches().then(setCatches).finally(() => setLoading(false));
+    Promise.all([getCatches(), getSpecies()])
+      .then(([catches, allSpecies]) => {
+        allSpecies.forEach((s: SpeciesEntry) => registerSpecies(s.id, s.name));
+        setCatches(catches);
+      })
+      .finally(() => setLoading(false));
   }, []));
 
   function handleEdit(c: Catch) {
@@ -76,17 +85,19 @@ export default function CatchHistoryScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
-  empty: { textAlign: 'center', marginTop: 80, color: '#6b7280', fontSize: 16 },
-  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', margin: 12, marginBottom: 0, borderRadius: 10, padding: 16, elevation: 2 },
-  cardInfo: { flex: 1 },
-  cardTitle: { fontSize: 16, fontWeight: '600' },
-  cardDetail: { marginTop: 4, color: '#6b7280' },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  iconBtn: { padding: 8 },
-  editIcon: { fontSize: 18, color: '#2563eb' },
-  deleteIcon: { fontSize: 18, color: '#ef4444' },
-  fab: { position: 'absolute', bottom: 28, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: '#2563eb', justifyContent: 'center', alignItems: 'center', elevation: 4 },
-  fabText: { color: '#fff', fontSize: 28, lineHeight: 32 },
-});
+function makeStyles(c: Colors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: c.bg },
+    empty: { textAlign: 'center', marginTop: 80, color: c.subtext, fontSize: 16 },
+    card: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.card, margin: 12, marginBottom: 0, borderRadius: 10, padding: 16, elevation: 2 },
+    cardInfo: { flex: 1 },
+    cardTitle: { fontSize: 16, fontWeight: '600', color: c.text },
+    cardDetail: { marginTop: 4, color: c.subtext },
+    actions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    iconBtn: { padding: 8 },
+    editIcon: { fontSize: 18, color: '#2563eb' },
+    deleteIcon: { fontSize: 18, color: '#ef4444' },
+    fab: { position: 'absolute', bottom: 28, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: '#2563eb', justifyContent: 'center', alignItems: 'center', elevation: 4 },
+    fabText: { color: '#fff', fontSize: 28, lineHeight: 32 },
+  });
+}

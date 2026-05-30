@@ -1,5 +1,6 @@
 package com.dsheils.catch_service;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,6 +18,12 @@ public class Location {
     private double latitude;
     private double longitude;
 
+    @Column(name = "\"public\"", nullable = false)
+    private boolean isPublic = true;
+
+    @Column(name = "user_id")
+    private Integer userId;
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getName() { return name; }
@@ -27,4 +34,8 @@ public class Location {
     public void setLatitude(double latitude) { this.latitude = latitude; }
     public double getLongitude() { return longitude; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
+    public boolean getIsPublic() { return isPublic; }
+    public void setIsPublic(boolean isPublic) { this.isPublic = isPublic; }
+    public Integer getUserId() { return userId; }
+    public void setUserId(Integer userId) { this.userId = userId; }
 }

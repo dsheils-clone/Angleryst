@@ -52,46 +52,55 @@ Each service owns its own PostgreSQL schema. A single Postgres StatefulSet in k8
 
 ## Build Roadmap
 
-### Phase 1 — Local Docker (no Kubernetes yet)
+### Phase 1 — Local Docker (no Kubernetes yet) ✅ COMPLETE
 Goal: get all services running and talking to each other before adding orchestration.
 
-1. Set up PostgreSQL via Docker Compose
-2. Scaffold User Service — registration, login, JWT
-3. Scaffold Catch Service — full CRUD, JWT-protected; include `lure_id` and `time_of_day` from the start
-4. Scaffold Tackle Service — lure catalog endpoints; custom lure creation/deletion
-5. Scaffold Inventory Service — user inventory CRUD with quantity tracking (`user_inventory` table)
-6. Scaffold Recommendation Service stub — hardcoded responses that match the real response contract
-7. Scaffold API Gateway — route `/users/**`, `/catches/**`, `/tackle/**`, `/inventory/**`, `/recommendations/**`
-8. Test all endpoints with Postman or Bruno
+1. ✅ Set up PostgreSQL via Docker Compose
+2. ✅ Scaffold User Service — registration, login, JWT
+3. ✅ Scaffold Catch Service — full CRUD, JWT-protected; include `lure_id` and `time_of_day` from the start
+4. ✅ Scaffold Tackle Service — lure catalog endpoints; custom lure creation/deletion
+5. ✅ Scaffold Inventory Service — user inventory CRUD with quantity tracking (`user_inventory` table)
+6. ✅ Scaffold Recommendation Service stub — hardcoded responses that match the real response contract
+7. ✅ Scaffold API Gateway — route `/users/**`, `/catches/**`, `/tackle/**`, `/inventory/**`, `/recommendations/**`
+8. ✅ Test all endpoints with Postman or Bruno
 
-### Phase 2 — Kubernetes Locally (kind or minikube)
+### Phase 2 — Kubernetes Locally (kind or minikube) ✅ COMPLETE
 Goal: deploy all five services into a local cluster.
 
-1. Write Dockerfiles for each Spring Boot service
-2. Write k8s manifests: Deployment + Service for each app
-3. Add a PostgreSQL StatefulSet
-4. Use ConfigMaps for environment config, Secrets for DB credentials
-5. Add an Ingress resource routing to the Gateway
-6. Verify end-to-end in the cluster
+1. ✅ Write Dockerfiles for each Spring Boot service
+2. ✅ Write k8s manifests: Deployment + Service for each app
+3. ✅ Add a PostgreSQL StatefulSet
+4. ✅ Use ConfigMaps for environment config, Secrets for DB credentials
+5. ✅ Add an Ingress resource routing to the Gateway
+6. ✅ Verify end-to-end in the cluster
 
-### Phase 3 — React Native App (Expo)
+### Phase 3 — React Native App (Expo) 🔄 IN PROGRESS
 Goal: build the mobile frontend against the working API.
 
-1. Auth screens — register, login, store JWT in secure storage
-2. Spots screen — map view showing saved spots, tap to view details
-3. Log Catch screen — species, weight, length, time auto-filled, spot picker, lure picker (from inventory or catalog search), optional notes
-4. Catch History screen — scrollable list of past catches
-5. Tackle Inventory screen — view owned lures, add from catalog, add custom lure
-6. Recommendations screen — shows "what to throw" based on current time/season; splits into "from your bag" and "consider buying"
-7. Stats screen — biggest fish, most-used lure, most active month
-8. Spot Conditions screen — from the Map tab, tapping a waterbody navigates to a conditions page. Pulls live weather from Open-Meteo (free, no API key) for the spot's coordinates. Indicators displayed as rounded-square cards, each with a speedometer/gauge showing fishing favorability (green = good, red = bad), not raw value. Indicators:
-   - **Air temperature** — comfort window for active fish
-   - **Water temperature** — estimated from recent air temp trend (Open-Meteo doesn't expose inland water temp directly)
-   - **Barometric pressure** — falling pressure scores highest (most fishing-active)
-   - **Wind speed** — moderate wind (5–12 mph) scores highest; calm and gale both score lower
-   - **Cloud cover** — overcast scores higher than full sun
-   - **Precipitation chance** — light recent rain scores higher than heavy or none
-   - **Moon phase** — computed client-side from date; full/new moon score highest (solunar)
+1. ✅ Auth screens — register, login, store JWT in secure storage (expo-secure-store + localStorage web fallback)
+2. ✅ Spots screen — fetches top 5 MA water bodies from DB via LocationController; web fallback list; tap to view conditions or detail
+3. ✅ Log Catch screen — species chips (8 species seeded), weight, length, editable date, spot picker, lure picker; edit mode with pre-populated fields
+4. ✅ Catch History screen — scrollable list with edit (pencil) and delete buttons; optimistic delete with rollback
+5. ✅ Tackle Inventory screen — view owned lures with resolved names (catalog + custom), +/- quantity buttons, confirm-delete
+6. ✅ Recommendations screen — shows "what to throw" based on current time/season
+7. ✅ Stats screen — biggest fish, most-used lure (resolved name), most active month
+8. ✅ Spot Conditions screen — from the Map tab, tapping a waterbody navigates to a conditions page. Pulls live weather from Open-Meteo (free, no API key). Town geocoded via Open-Meteo geocoding API with in-memory cache. Indicators on neutral raw scales (not fishing-calibrated — AI interpretation planned for Phase 6.5):
+   - **Air temperature** (0–100°F scale)
+   - **Water temperature** — estimated from 3-day average air temp (Open-Meteo doesn't expose inland water temp directly)
+   - **Barometric pressure** (28.5–30.5 inHg scale), with 6h trend arrow
+   - **Wind speed** (0–25 mph scale)
+   - **Cloud cover** (0–100%)
+   - **Precipitation chance** (0–100%)
+   - **Moon phase** — computed client-side from synodic cycle; displays phase name + illumination %
+9. ✅ Bite Guide — 2D quadrant plot beneath the Spot Conditions cards. Synthesizes weather indicators into two axes using a weighted algorithm:
+   - **Activity** (−1 = sluggish → +1 = very active): driven by pressure delta, cloud cover, wind, precip, water temp, air temp, moon
+   - **Depth** (+1 = shallow/surface → −1 = deep/bottom): same indicators, different weights and sign encodings
+   - Pressure uses 3h delta (more responsive than 6h); falling pressure is the dominant signal
+   - Animated blue dot placed at (activity, depth) with 700ms ease-out animation
+   - Quadrant text hints: e.g. "Fish are active near the surface — try topwater…"
+   - Weights: pressure 1.0/0.8 · cloud 0.8/0.9 · wind 0.7/0.6 · precip 0.7/0.5 · water temp 0.7/0.85 · air temp 0.4/0.2 · moon 0.15/0.05
+
+**Seeded data:** 8 species, 5 MA water bodies (Farm Pond Sherborn, Cochituate Lake Framingham, Lake Winthrop, Ashland Reservoir, Hopkinton Reservoir) with lat/lon and town columns.
 
 ### Phase 4 — Polish & Deploy
 Goal: make it portfolio-ready.

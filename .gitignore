@@ -3,3 +3,4 @@ CLAUDE.md
 **/build/
 minikube-linux-amd64
 kubectl
+zips/

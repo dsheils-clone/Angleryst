@@ -5,6 +5,7 @@ export interface CurrentConditions {
   waterTempF: number;
   pressureInHg: number;
   pressureTrend6h: number;
+  pressureTrend3h: number;
   windMph: number;
   cloudCoverPct: number;
   precipChancePct: number;
@@ -54,6 +55,9 @@ export async function getConditions(latitude: number, longitude: number): Promis
   const idx6hAgo = Math.max(0, idxNow - 6);
   const pressure6hAgoHpa = hourlyPressureHpa[idx6hAgo] ?? pressureHpaNow;
   const pressureTrend6h = (pressureHpaNow - pressure6hAgoHpa) * 0.02953;
+  const idx3hAgo = Math.max(0, idxNow - 3);
+  const pressure3hAgoHpa = hourlyPressureHpa[idx3hAgo] ?? pressureHpaNow;
+  const pressureTrend3h = (pressureHpaNow - pressure3hAgoHpa) * 0.02953;
 
   const recentTemps: number[] = (hourly.temperature_2m ?? []).slice(0, 72);
   const avg3dayAirF = recentTemps.length
@@ -66,6 +70,7 @@ export async function getConditions(latitude: number, longitude: number): Promis
     waterTempF,
     pressureInHg: pressureInHgNow,
     pressureTrend6h,
+    pressureTrend3h,
     windMph: current.wind_speed_10m,
     cloudCoverPct: current.cloud_cover,
     precipChancePct: current.precipitation_probability ?? 0,

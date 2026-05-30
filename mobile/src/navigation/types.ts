@@ -17,6 +17,7 @@ export type CatchStackParamList = {
 
 export type MapStackParamList = {
   Spots: undefined;
+  AddSpot: undefined;
   SpotDetail: { locationId: number; name: string };
   SpotRecs: { locationId: number; region: string };
   SpotConditions: { locationId: number; name: string; latitude: number; longitude: number; town?: string };

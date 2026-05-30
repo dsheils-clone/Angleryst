@@ -12,7 +12,7 @@ export default function MainTabNavigator() {
       <Tab.Screen name="Catches" component={CatchStackNavigator} />
       <Tab.Screen name="Map" component={MapStackNavigator} />
       <Tab.Screen name="Tackle" component={TackleStackNavigator} />
-      <Tab.Screen name="Stats" component={StatsStackNavigator} />
+      <Tab.Screen name="Stats" component={StatsStackNavigator} options={{ tabBarLabel: 'Settings' }} />
     </Tab.Navigator>
   );
 }
