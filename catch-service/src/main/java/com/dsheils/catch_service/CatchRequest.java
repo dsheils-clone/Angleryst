@@ -2,12 +2,23 @@ package com.dsheils.catch_service;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+
 public class CatchRequest {
+    @Positive
     private int speciesId;
+    @Positive
     private int lureId;
+    @Positive
     private int locationId;
+    @Positive
     private float weight;
+    @Positive
     private float length;
+    @NotNull
+    @PastOrPresent
     private LocalDate dateCaught;
 
     public int getSpeciesId() { return speciesId; }

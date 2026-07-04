@@ -63,7 +63,7 @@ class TackleIntegrationTest {
     void getCatalogById_notFound_fails() throws Exception {
         mockMvc.perform(get("/tackle/catalog/999")
                 .header("Authorization", "Bearer " + tokenUser1))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isNotFound());
     }
 
     @Test
@@ -114,7 +114,7 @@ class TackleIntegrationTest {
 
         mockMvc.perform(delete("/tackle/custom/" + custom.getId())
                 .header("Authorization", "Bearer " + tokenUser1))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isNotFound());
     }
 
     @Test

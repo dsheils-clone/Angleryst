@@ -27,7 +27,7 @@ class ApiGatewayApplicationTest {
     @Test
     void allRoutesAreConfigured() {
         assertThat(gatewayProperties.getRoutes()).containsOnlyKeys(
-            "users", "catches", "tackle", "inventory", "recommendations"
+            "users", "catches", "locations", "species", "tackle", "inventory", "recommendations"
         );
     }
 

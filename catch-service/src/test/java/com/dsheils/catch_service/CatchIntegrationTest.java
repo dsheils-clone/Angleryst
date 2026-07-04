@@ -79,7 +79,7 @@ class CatchIntegrationTest {
 
         mockMvc.perform(get("/catches/" + saved.getId())
                 .header("Authorization", "Bearer " + tokenUser1))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isNotFound());
     }
 
     @Test

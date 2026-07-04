@@ -1,7 +1,9 @@
 package com.dsheils.tackle_service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -15,7 +17,7 @@ public class TackleService {
 
     public Lure getCatalogById(int id) {
         return lureRepository.findByIdAndCustomFalse(id)
-                .orElseThrow(() -> new RuntimeException("Lure not found in catalog"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lure not found in catalog"));
     }
 
     public List<Lure> getCustomLures(int userId) {
@@ -36,7 +38,7 @@ public class TackleService {
 
     public void deleteCustomLure(int userId, int lureId) {
         Lure lure = lureRepository.findByIdAndCustomTrueAndUserId(lureId, userId)
-                .orElseThrow(() -> new RuntimeException("Custom lure not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Custom lure not found"));
         lureRepository.delete(lure);
     }
 }

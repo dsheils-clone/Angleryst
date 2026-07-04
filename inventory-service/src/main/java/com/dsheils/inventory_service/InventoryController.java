@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 @RestController
@@ -32,7 +34,7 @@ public class InventoryController {
     }
 
     @PutMapping("/{lureId}")
-    public UserInventory updateQuantity(@PathVariable int lureId, @RequestBody InventoryRequest request) {
+    public UserInventory updateQuantity(@PathVariable int lureId, @Valid @RequestBody InventoryRequest request) {
         return inventoryService.updateQuantity(currentUserId(), lureId, request.getQuantity());
     }
 

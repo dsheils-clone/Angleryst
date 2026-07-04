@@ -1,7 +1,11 @@
 package com.dsheils.recommendation_service;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class RecommendationRequest {
+    @NotBlank
     private String timeOfDay;   // MORNING, AFTERNOON, EVENING
+    @NotBlank
     private String season;      // SPRING, SUMMER, FALL, WINTER
     private String region;
 

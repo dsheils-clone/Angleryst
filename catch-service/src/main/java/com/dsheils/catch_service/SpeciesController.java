@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/species")
@@ -27,7 +28,7 @@ public class SpeciesController {
     @ResponseStatus(HttpStatus.CREATED)
     public Species findOrCreate(@RequestBody Map<String, String> body) {
         String name = body.getOrDefault("name", "").trim();
-        if (name.isEmpty()) throw new IllegalArgumentException("name is required");
+        if (name.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "name is required");
         return speciesRepository.findByName(name).orElseGet(() -> {
             Species s = new Species();
             s.setName(name);

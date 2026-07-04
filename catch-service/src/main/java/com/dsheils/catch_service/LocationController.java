@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/locations")
 public class LocationController {
@@ -31,7 +33,7 @@ public class LocationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Location create(@RequestBody LocationRequest request) {
+    public Location create(@Valid @RequestBody LocationRequest request) {
         Location location = new Location();
         location.setName(request.getName());
         location.setTown(request.getTown());

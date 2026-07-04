@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class CatchService {
@@ -30,7 +32,7 @@ public class CatchService {
 
     public Catch getByIdForUser(int id, int userId) {
         return catchRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new RuntimeException("Catch not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Catch not found"));
     }
 
     public Catch update(int id, int userId, CatchRequest request) {

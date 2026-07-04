@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/catches")
 public class CatchController {
@@ -23,7 +25,7 @@ public class CatchController {
     private CatchService catchService;
 
     @PostMapping
-    public Catch create(@RequestBody CatchRequest request) {
+    public Catch create(@Valid @RequestBody CatchRequest request) {
         return catchService.create(currentUserId(), request);
     }
 
@@ -38,7 +40,7 @@ public class CatchController {
     }
 
     @PutMapping("/{id}")
-    public Catch update(@PathVariable int id, @RequestBody CatchRequest request) {
+    public Catch update(@PathVariable int id, @Valid @RequestBody CatchRequest request) {
         return catchService.update(id, currentUserId(), request);
     }
 

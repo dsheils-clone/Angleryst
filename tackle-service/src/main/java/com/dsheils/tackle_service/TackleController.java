@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 @RestController
@@ -36,7 +38,7 @@ public class TackleController {
     }
 
     @PostMapping("/custom")
-    public Lure createCustomLure(@RequestBody CustomLureRequest request) {
+    public Lure createCustomLure(@Valid @RequestBody CustomLureRequest request) {
         return tackleService.createCustomLure(currentUserId(), request);
     }
 

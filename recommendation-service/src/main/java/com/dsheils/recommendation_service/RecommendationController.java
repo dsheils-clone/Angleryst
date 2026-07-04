@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 @RestController
@@ -15,7 +17,7 @@ public class RecommendationController {
     private RecommendationService recommendationService;
 
     @PostMapping
-    public List<LureRecommendation> getRecommendations(@RequestBody RecommendationRequest request) {
+    public List<LureRecommendation> getRecommendations(@Valid @RequestBody RecommendationRequest request) {
         return recommendationService.getRecommendations(request);
     }
 }

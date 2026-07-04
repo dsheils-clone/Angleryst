@@ -60,7 +60,7 @@ class InventoryIntegrationTest {
 
         mockMvc.perform(post("/inventory/42")
                 .header("Authorization", "Bearer " + tokenUser1))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isConflict());
     }
 
     @Test
@@ -86,7 +86,7 @@ class InventoryIntegrationTest {
                 .header("Authorization", "Bearer " + tokenUser1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isNotFound());
     }
 
     @Test
@@ -104,7 +104,7 @@ class InventoryIntegrationTest {
     void removeFromInventory_notInInventory_fails() throws Exception {
         mockMvc.perform(delete("/inventory/99")
                 .header("Authorization", "Bearer " + tokenUser1))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isNotFound());
     }
 
     @Test

@@ -4,8 +4,10 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserService {
@@ -16,11 +18,11 @@ public class UserService {
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User register(String username, String email, String password) {
-        if (!userRepository.findByUsername(username).isEmpty()) {
-            throw new RuntimeException("Username is taken!");
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username is taken");
         }
-        if (!userRepository.findByEmail(email).isEmpty()) {
-            throw new RuntimeException("Email already in use!");
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
         }
         return userRepository.save(new User(username, email, passwordEncoder.encode(password), LocalDateTime.now()));
     }
@@ -30,13 +32,12 @@ public class UserService {
         if (account.isEmpty()) {
             account = userRepository.findByEmail(username);
         }
-        if (account.isEmpty()) {
-            throw new RuntimeException("Username or email not found!");
-        }
-        User user = account.get();
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Incorrect password");
-        }
+        // One generic 401 for both an unknown account and a wrong password, so the
+        // response can't be used to enumerate which usernames/emails exist.
+        User user = account
+                .filter(u -> passwordEncoder.matches(password, u.getPassword()))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "Invalid username or password"));
         return jwtUtil.generateToken(user.getId(), user.getUsername());
     }
 }

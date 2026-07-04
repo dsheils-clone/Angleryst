@@ -28,7 +28,7 @@ class AuthIntegrationTest {
     void register_success_returnsUserWithoutPassword() throws Exception {
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json("angler1", "angler1@test.com", "pass123")))
+                .content(json("angler1", "angler1@test.com", "password1")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.username").value("angler1"))
             .andExpect(jsonPath("$.email").value("angler1@test.com"))
@@ -36,27 +36,37 @@ class AuthIntegrationTest {
     }
 
     @Test
+    void register_invalidInput_returnsBadRequest() throws Exception {
+        // Blank username, malformed email, and a too-short password all violate
+        // the bean-validation constraints on RegisterRequest.
+        mockMvc.perform(post("/users/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json("", "not-an-email", "short")))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void register_duplicateUsername_fails() throws Exception {
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json("dup", "first@test.com", "pass")));
+                .content(json("dup", "first@test.com", "password1")));
 
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json("dup", "second@test.com", "pass")))
-            .andExpect(status().isBadRequest());
+                .content(json("dup", "second@test.com", "password1")))
+            .andExpect(status().isConflict());
     }
 
     @Test
     void register_duplicateEmail_fails() throws Exception {
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json("user1", "shared@test.com", "pass")));
+                .content(json("user1", "shared@test.com", "password1")));
 
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json("user2", "shared@test.com", "pass")))
-            .andExpect(status().isBadRequest());
+                .content(json("user2", "shared@test.com", "password1")))
+            .andExpect(status().isConflict());
     }
 
     // --- login ---
@@ -65,11 +75,11 @@ class AuthIntegrationTest {
     void login_success_returnsJwt() throws Exception {
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json("fisher", "fisher@test.com", "secret")));
+                .content(json("fisher", "fisher@test.com", "password1")));
 
         String token = mockMvc.perform(post("/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of("username", "fisher", "password", "secret"))))
+                .content(objectMapper.writeValueAsString(Map.of("username", "fisher", "password", "password1"))))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
 
@@ -80,11 +90,11 @@ class AuthIntegrationTest {
     void login_byEmail_success() throws Exception {
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json("emailuser", "emailuser@test.com", "secret")));
+                .content(json("emailuser", "emailuser@test.com", "password1")));
 
         String token = mockMvc.perform(post("/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of("username", "emailuser@test.com", "password", "secret"))))
+                .content(objectMapper.writeValueAsString(Map.of("username", "emailuser@test.com", "password", "password1"))))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
 
@@ -95,20 +105,20 @@ class AuthIntegrationTest {
     void login_wrongPassword_fails() throws Exception {
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json("wrongpass", "wrongpass@test.com", "correct")));
+                .content(json("wrongpass", "wrongpass@test.com", "password1")));
 
         mockMvc.perform(post("/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of("username", "wrongpass", "password", "wrong"))))
-            .andExpect(status().isBadRequest());
+                .content(objectMapper.writeValueAsString(Map.of("username", "wrongpass", "password", "wrongpass99"))))
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
     void login_unknownUser_fails() throws Exception {
         mockMvc.perform(post("/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of("username", "nobody", "password", "pass"))))
-            .andExpect(status().isBadRequest());
+                .content(objectMapper.writeValueAsString(Map.of("username", "nobody", "password", "password1"))))
+            .andExpect(status().isUnauthorized());
     }
 
     // --- JWT protection ---
@@ -130,11 +140,11 @@ class AuthIntegrationTest {
     void protectedPath_withValidToken_isAuthenticated() throws Exception {
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json("tokenuser", "token@test.com", "pass")));
+                .content(json("tokenuser", "token@test.com", "password1")));
 
         String token = mockMvc.perform(post("/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of("username", "tokenuser", "password", "pass"))))
+                .content(objectMapper.writeValueAsString(Map.of("username", "tokenuser", "password", "password1"))))
             .andReturn().getResponse().getContentAsString();
 
         // 404 means the request reached Spring MVC (authenticated); anything else means security rejected it

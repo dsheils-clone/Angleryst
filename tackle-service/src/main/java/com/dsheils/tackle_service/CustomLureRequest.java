@@ -1,7 +1,11 @@
 package com.dsheils.tackle_service;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class CustomLureRequest {
+    @NotBlank
     private String name;
+    @NotBlank
     private String type;
     private String brand;
     private String size;
