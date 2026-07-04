@@ -22,3 +22,5 @@ kubectl
 # Archives / scratch
 zips/
 *.zip
+
+specs/

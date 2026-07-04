@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS "locations"(
     "latitude" FLOAT NOT NULL,
     "longitude" FLOAT NOT NULL,
     "public" BOOLEAN NOT NULL DEFAULT TRUE,
-    PRIMARY KEY ("id")
+    "user_id" INT,
+    PRIMARY KEY ("id"),
+    FOREIGN KEY ("user_id") REFERENCES users(id)
 );
 CREATE TABLE IF NOT EXISTS "species"(
     "id" SERIAL,
