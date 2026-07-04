@@ -61,6 +61,7 @@ export default function LurePickerScreen({ navigation, route }: Props) {
         <FlatList
           data={filtered}
           keyExtractor={(item) => String(item.id)}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.row} onPress={() => pick(item)}>
               <View style={styles.info}>

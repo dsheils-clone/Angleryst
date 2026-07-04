@@ -60,6 +60,7 @@ export default function CatchHistoryScreen({ navigation }: Props) {
         <FlatList
           data={catches}
           keyExtractor={(item) => String(item.id)}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.cardInfo}>

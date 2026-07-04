@@ -52,7 +52,7 @@ export default function LoginScreen({ navigation }: Props) {
 function makeStyles(c: Colors) {
   return StyleSheet.create({
     container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: c.bg },
-    title: { fontSize: 32, fontWeight: 'bold', marginBottom: 32, textAlign: 'center', color: c.text },
+    title: { fontSize: 32, fontWeight: 'bold', marginBottom: 32, textAlign: 'center', color: '#0b926a' },
     input: { borderWidth: 1, borderColor: c.border, borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 16, color: c.text, backgroundColor: c.card },
     button: { backgroundColor: '#2563eb', borderRadius: 8, padding: 14, alignItems: 'center', marginBottom: 16 },
     buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
