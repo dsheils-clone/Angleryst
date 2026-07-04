@@ -1,6 +1,24 @@
+# Claude / local tooling
 CLAUDE.md
-.claude
+.claude/
+
+# Secrets / local env (never commit real values)
+.env
+**/.env
+!**/.env.example
+
+# Gradle / Java build output
+.gradle/
+**/.gradle/
+build/
 **/build/
+bin/
+**/bin/
+
+# Large local binaries (download separately, do not commit)
 minikube-linux-amd64
 kubectl
+
+# Archives / scratch
 zips/
+*.zip

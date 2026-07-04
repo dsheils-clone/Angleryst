@@ -7,7 +7,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class JwtUtilTest {
-    private static final String SECRET = "REDACTED";
+    private static final String SECRET = "dGVzdC1vbmx5LWp3dC1zaWduaW5nLWtleS1ub3QtZm9yLXByb2R1Y3Rpb24tMDE=";
 
     private JwtUtil jwtUtil;
 

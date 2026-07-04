@@ -1,18 +1,19 @@
 version: '3.8'
 
+# Values are injected from docker/.env (see docker/.env.example). Never commit real secrets.
 x-service-env: &service-env
   DB_URL: jdbc:postgresql://db:5432/anglerystDB
-  DB_USERNAME: ds
-  DB_PASSWORD: REDACTED
-  JWT_SECRET: REDACTED
+  DB_USERNAME: ${DB_USERNAME}
+  DB_PASSWORD: ${DB_PASSWORD}
+  JWT_SECRET: ${JWT_SECRET}
 
 services:
   db:
     image: postgres:17
     restart: always
     environment:
-      POSTGRES_PASSWORD: REDACTED
-      POSTGRES_USER: ds
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_DB: anglerystDB
     ports:
       - "5432:5432"
@@ -20,7 +21,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ../db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ds -d anglerystDB"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d anglerystDB"]
       interval: 5s
       retries: 10
 
@@ -77,7 +78,7 @@ services:
     build:
       context: ../recommendation-service
     environment:
-      JWT_SECRET: REDACTED
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8094:8094"
 
