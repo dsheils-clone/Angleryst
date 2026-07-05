@@ -5,6 +5,7 @@ CLAUDE.md
 # Secrets / local env (never commit real values)
 .env
 **/.env
+**/.env.*
 !**/.env.example
 
 # Gradle / Java build output
