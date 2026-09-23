@@ -2,7 +2,7 @@
 CLAUDE.md
 .claude/
 
-# Secrets / local env (never commit real values)
+# Secrets / local env 
 .env
 **/.env
 **/.env.*
